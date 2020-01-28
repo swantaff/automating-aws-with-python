@@ -1,2 +1,3 @@
-# automating-aws-with-python
-Respository for Automation scripts in python for working with AWS
+# Automating AWS with Python
+
+Respository for the ACloud Guru course *Automation scripts in python for working with AWS*
