@@ -10,3 +10,4 @@ webdeploy is a script yhat will sync a local directory to an s3 bucket, and opti
 
 - List all buckets
 - List content of a bucket
+- Create and configure S3 Bucket
