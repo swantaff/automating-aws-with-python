@@ -90,11 +90,13 @@ def upload_file(s3_bucket, path, key):
         })
     return
 
+
 @cli.command('sync')
 @click.argument('pathname', type=click.Path(exists=True))
-@click.argument(bucket)
+@click.argument('bucket')
 def sync(pathname, bucket):
     "Sync contents of PATHNAME to BUCKET"
+
     s3_bucket = s3.Bucket(bucket)
     root = Path(pathname).expanduser().resolve()
     print("Root is : {}\n".format(root))
@@ -107,8 +109,6 @@ def sync(pathname, bucket):
     handle_directory(root)
 
     return
-
-
 
 if __name__ == '__main__':
     cli()
