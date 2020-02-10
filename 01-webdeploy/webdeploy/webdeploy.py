@@ -56,6 +56,7 @@ def setup_bucket(bucket):
 @click.argument('bucket')
 def sync(pathname, bucket):
     """Sync contents of PATHNAME to BUCKET."""
+    print("Bucket in webdeploy is : {}".format(bucket))
     bucket_manager.sync(pathname, bucket)
 
 

@@ -26,10 +26,10 @@ class BucketManager:
         s3_bucket = None
         try:
             s3_bucket = self.s3.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={
-                    'LocationConstraint': self.session.region_name
-                }
+                Bucket=bucket_name
+               # CreateBucketConfiguration={
+               #     'LocationConstraint': self.session.region_name
+               # }
             )
         except ClientError as error:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
@@ -40,6 +40,8 @@ class BucketManager:
 
     def set_policy(self, bucket):
         """Set bucket policy to be readable by everyone."""
+        print("Bucket name passed is : ")
+        print(bucket.name)
         policy = """
         {
             "Version":"2012-10-17",
@@ -72,8 +74,14 @@ class BucketManager:
 
     
     @staticmethod
-    def upload_file(bucket, path, key):
+    def upload_file(bucket_name, path, key):
         """Upload files to S3 bucket given PATH and Key."""
+        bucket = s3.Bucket(bucket_name)
+        print("In upload_file")
+        print("Bucket is : {}".format(bucket))
+        print("Path is : {}".format(path))
+        print("Key is : {}".format(key))
+
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
         return bucket.upload_file(
             path,
@@ -84,16 +92,17 @@ class BucketManager:
 
     def sync(self, pathname, bucket_name):
         """Sync."""
-        bucket = self.s3.Bucket(bucket_name)
+        #bucket = self.s3.Bucket(bucket_name)
         
         root = Path(pathname).expanduser().resolve()
-        #print("Root is : {}\n".format(root))
+        print("Root is : {}\n".format(root))
+        print("Bucket is : {}".format(bucket_name))
 
         def handle_directory(target):
             for path in target.iterdir():
                 if path.is_dir():
                     handle_directory(path)
                 if path.is_file():
-                    self.upload_file(bucket, str(path), str(path.relative_to(root)))
+                    self.upload_file(bucket_name, str(path), str(path.relative_to(root)))
 
         handle_directory(root)
