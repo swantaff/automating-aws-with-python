@@ -12,15 +12,14 @@ Webdeploy automates the process od deploying statis websites to AWS
 - Configure a Content Delivery Network and SSL with AWS Cloudfront
 """
 
-from pathlib import Path
-import mimetypes
-from botocore.exceptions import ClientError
 import boto3
 import click
 
+from bucket import BucketManager
+
 
 session = boto3.Session(profile_name='pythonAutomation')
-s3 = session.resource('s3')
+bucket_manager = BucketManager(session)
 
 
 @click.group()
@@ -31,7 +30,7 @@ def cli():
 @cli.command('list-buckets')
 def list_buckets():
     """List all s3 buckets."""
-    for bucket in s3.buckets.all():
+    for bucket in bucket_manager.all_buckets():
         print(bucket)
 
 
@@ -39,7 +38,7 @@ def list_buckets():
 @click.argument('bucket')
 def list_bucket_objects(bucket):
     """List the contents of a Bucket."""
-    for obj in s3.Bucket(bucket).objects.all():
+    for obj in bucket_manager.all_objects(bucket):
         print(obj)
 
 
@@ -57,7 +56,6 @@ def setup_bucket(bucket):
 @click.argument('bucket')
 def sync(pathname, bucket):
     """Sync contents of PATHNAME to BUCKET."""
-    s3_bucket = s3.Bucket(bucket)
     bucket_manager.sync(pathname, bucket)
 
 

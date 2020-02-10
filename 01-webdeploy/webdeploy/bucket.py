@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 import mimetypes
 from botocore.exceptions import ClientError
 
@@ -9,7 +10,8 @@ class BucketManager:
     """Manage an S3 Bucket."""
     def __init__(self, session):
         """Create a Bucket Manager Object."""
-        self.s3 = session.resource('s3')
+        self.session = session
+        self.s3 = self.session.resource('s3')
 
     def all_buckets(self):
         """Get an iterator for all buckets."""
@@ -31,7 +33,7 @@ class BucketManager:
             )
         except ClientError as error:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
-                s3_bucket = self.s3.Bucket(bucket)
+                s3_bucket = self.s3.Bucket(bucket_name)
             else:
                 raise error
         return s3_bucket
@@ -58,7 +60,7 @@ class BucketManager:
         pol.put(Policy=policy)
 
     def configure_website(self, bucket):
-        """Configure Website.  """   
+        """Configure Website."""   
         bucket.Website().put(WebsiteConfiguration={
             'ErrorDocument': {
                 'Key': 'error.html'
@@ -69,6 +71,7 @@ class BucketManager:
         })
 
     
+    @staticmethod
     def upload_file(bucket, path, key):
         """Upload files to S3 bucket given PATH and Key."""
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
@@ -79,8 +82,10 @@ class BucketManager:
                 'ContentType': content_type
             })
 
-    def sync(self, pathname, bucket):
+    def sync(self, pathname, bucket_name):
         """Sync."""
+        bucket = self.s3.Bucket(bucket_name)
+        
         root = Path(pathname).expanduser().resolve()
         #print("Root is : {}\n".format(root))
 
@@ -89,6 +94,6 @@ class BucketManager:
                 if path.is_dir():
                     handle_directory(path)
                 if path.is_file():
-                    upload_file(s3_bucket, str(path), str(path.relative_to(root)))
+                    self.upload_file(bucket, str(path), str(path.relative_to(root)))
 
         handle_directory(root)
