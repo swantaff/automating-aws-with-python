@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""Classes for S3 Buckets."""
+
 from pathlib import Path
 import mimetypes
 from botocore.exceptions import ClientError
-
-"""Classes for S3 Buckets."""
 
 class BucketManager:
     """Manage an S3 Bucket."""
@@ -23,25 +23,26 @@ class BucketManager:
 
     def init_bucket(self, bucket_name):
         """Create a new bucket, or return existing one by name."""
+        print("region is : {}",self.session.region_name)
         s3_bucket = None
         try:
             s3_bucket = self.s3.create_bucket(
-                Bucket=bucket_name
-               # CreateBucketConfiguration={
-               #     'LocationConstraint': self.session.region_name
-               # }
+                Bucket=bucket_name,
+                CreateBucketConfiguration={
+                    'LocationConstraint': self.session.region_name
+                }
             )
         except ClientError as error:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
                 s3_bucket = self.s3.Bucket(bucket_name)
             else:
                 raise error
+
         return s3_bucket
 
     def set_policy(self, bucket):
         """Set bucket policy to be readable by everyone."""
-        print("Bucket name passed is : ")
-        print(bucket.name)
+        print("Bucket name passed is : {}", bucket.name)
         policy = """
         {
             "Version":"2012-10-17",
@@ -62,7 +63,9 @@ class BucketManager:
         pol.put(Policy=policy)
 
     def configure_website(self, bucket):
-        """Configure Website."""   
+        """Configure Website.""" 
+        print("Bucket name passed is : {}", bucket.name) 
+
         bucket.Website().put(WebsiteConfiguration={
             'ErrorDocument': {
                 'Key': 'error.html'
@@ -74,11 +77,11 @@ class BucketManager:
 
     
     @staticmethod
-    def upload_file(bucket_name, path, key):
+    def upload_file_to_s3(bucket, path, key):
         """Upload files to S3 bucket given PATH and Key."""
-        bucket = s3.Bucket(bucket_name)
-        print("In upload_file")
-        print("Bucket is : {}".format(bucket))
+        
+        print("In upload_file...")
+        print("Bucket is : {}".format(bucket.name))
         print("Path is : {}".format(path))
         print("Key is : {}".format(key))
 
@@ -92,17 +95,21 @@ class BucketManager:
 
     def sync(self, pathname, bucket_name):
         """Sync."""
-        #bucket = self.s3.Bucket(bucket_name)
-        
+        print("In BucketManager sync function..")
+        bucket = self.s3.Bucket(bucket_name)
+        print(bucket)
+        print("printed bucket above")
         root = Path(pathname).expanduser().resolve()
+
         print("Root is : {}\n".format(root))
-        print("Bucket is : {}".format(bucket_name))
+        print("Bucket is : {}".format(bucket.name))
 
         def handle_directory(target):
             for path in target.iterdir():
                 if path.is_dir():
                     handle_directory(path)
                 if path.is_file():
-                    self.upload_file(bucket_name, str(path), str(path.relative_to(root)))
+                    self.upload_file_to_s3(bucket, str(path), str(path.relative_to(root)))
 
         handle_directory(root)
+        
