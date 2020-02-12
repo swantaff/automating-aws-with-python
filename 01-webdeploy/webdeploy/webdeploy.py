@@ -17,14 +17,30 @@ import click
 
 from bucket import BucketManager
 
-
-session = boto3.Session(profile_name='pythonAutomation')
-bucket_manager = BucketManager(session)
+# Global variables
+session = None
+bucket_manager = None
 
 
 @click.group()
-def cli():
+@click.option('--profile', default=None,
+    help="Use a given AWS profile.")
+def cli(profile):
     """Webdeploy deploys websites to AWS."""
+    
+    #ref globals above, than when re-assigned other functions have access to them
+    global session, bucket_manager
+
+    session_cfg = {}
+    if profile:
+        session_cfg['profile_name'] = profile
+
+    # Pass-in dictionary as args to function (sometimes called a glob) with ** operator
+    # ** will do the right thing and uwrap or unroll key pairs to make parameters for your function
+    session = boto3.Session(**session_cfg) 
+    bucket_manager = BucketManager(session)
+    pass
+
 
 
 @cli.command('list-buckets')
