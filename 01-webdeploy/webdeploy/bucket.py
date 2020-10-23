@@ -40,15 +40,23 @@ class BucketManager:
 
     def init_bucket(self, bucket_name):
         """Create a new bucket, or return existing one by name."""
-        print("region is : {}",self.session.region_name)
+
+        print("init_bucket invoked - region is : ", self.session.region_name)
         s3_bucket = None
+
         try:
-            s3_bucket = self.s3.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={
-                    'LocationConstraint': self.session.region_name
-                }
-            )
+            # Test region for us-east-1 - no locationconstraint required !
+            if self.session.region_name == 'us-east-1':
+                s3_bucket = self.s3.create_bucket(Bucket=bucket_name)
+            else:
+            # Otherwise must pass a region to locationconstraint 
+                s3_bucket = self.s3.create_bucket(
+                    Bucket=bucket_name,
+                    CreateBucketConfiguration={
+                        'LocationConstraint': self.session.region_name
+                    }
+                )
+
         except ClientError as error:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
                 s3_bucket = self.s3.Bucket(bucket_name)

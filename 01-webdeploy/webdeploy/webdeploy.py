@@ -38,6 +38,7 @@ def cli(profile):
     # Pass-in dictionary as args to function (sometimes called a glob) with ** operator
     # ** will do the right thing and uwrap or unroll key pairs to make parameters for your function
     session = boto3.Session(**session_cfg) 
+    print(session)
     bucket_manager = BucketManager(session)
     pass
 
@@ -47,7 +48,8 @@ def cli(profile):
 def list_buckets():
     """List all s3 buckets."""
     for bucket in bucket_manager.all_buckets():
-        print(bucket)
+        print(bucket, end = ' ')
+        print('Region is : ',bucket_manager.get_region_name(bucket))
 
 
 @cli.command('list-bucket-objects')
