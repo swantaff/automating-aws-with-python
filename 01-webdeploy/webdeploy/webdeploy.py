@@ -3,7 +3,7 @@
 
 """Webdeploy: Deploy websites with AWS.
 
-Webdeploy automates the process od deploying statis websites to AWS
+Webdeploy automates the process od deploying static websites to AWS
 - Configure AWS S3 buckets
     - Create them
     - Set them up for static wesite hosting
@@ -28,7 +28,7 @@ bucket_manager = None
 def cli(profile):
     """Webdeploy deploys websites to AWS."""
     
-    #ref globals above, than when re-assigned other functions have access to them
+    #ref globals above, then when re-assigned other functions have access to them
     global session, bucket_manager
 
     session_cfg = {}
@@ -66,6 +66,8 @@ def setup_bucket(bucket):
     bucket_manager.set_policy(s3_bucket)
     bucket_manager.configure_website(s3_bucket)
 
+    return
+
 
 @cli.command('sync')
 @click.argument('pathname', type=click.Path(exists=True))
@@ -74,6 +76,7 @@ def sync(pathname, bucket):
     """Sync contents of PATHNAME to BUCKET."""
     print("Bucket in webdeploy is : {}".format(bucket))
     bucket_manager.sync(pathname, bucket)
+    print(bucket_manager.get_bucket_url(bucket_manager.s3.Bucket(bucket)))
 
 
 
