@@ -15,12 +15,12 @@ Webdeploy automates the process od deploying static websites to AWS
 import boto3
 import click
 
-from bucket import BucketManager
-from domain import DomainManager
-from certificate import CertificateManager
-from cdn import DistributionManager
+from webdeploy.bucket import BucketManager
+from webdeploy.domain import DomainManager
+from webdeploy.certificate import CertificateManager
+from webdeploy.cdn import DistributionManager
 
-import util
+from webdeploy import util
 
 
 # Global variables
