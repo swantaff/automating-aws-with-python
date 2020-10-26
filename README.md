@@ -13,3 +13,4 @@ webdeploy is a script yhat will sync a local directory to an s3 bucket, and opti
 - Create and configure S3 Bucket
 - Sync directory tree to bucket
 - Set AWS profile with --profile=<profileName>
+- Configure rout 53 domain

@@ -28,6 +28,10 @@ class BucketManager:
         )
         self.manifest = {}
 
+    def get_bucket(self, bucket):
+        """Get a bucket by name."""
+        return self.s3.meta.client
+
     def get_region_name(self, bucket):
          """Get the bucket's region name."""
          client = self.s3.meta.client
@@ -146,7 +150,9 @@ class BucketManager:
         elif len(hashes) == 1:
             return '"{}"'.format(hashes[0].hexdigest())
         else:
-            hash = self.hash_data(reduce(lambda x, y: x + y, (h.digest() for h in hashes)))
+        #   hash = self.hash_data(reduce(lambda x, y: x + y, (h.digest() for h in hashes)))
+            digests = (h.digest() for h in hashes)
+            hash = self.hash_data(reduce(lambda x, y: x + y, digests))
             return '"{}-{}"'.format(hash.hexdigest(), len(hashes))
    
     def upload_file_to_s3(self, bucket, path, key):
@@ -158,6 +164,7 @@ class BucketManager:
         
         etag = self.gen_etag(path)
         if self.manifest.get(key, '') == etag:
+            print("Skipping {}, etags match".format(key))
             return
         
         return bucket.upload_file(
